@@ -1,0 +1,55 @@
+curl http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "Qwen/Qwen3-30B-A3B-Instruct-2507",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a text-to-SQL expert. Return ONLY the executable SQL query inside a markdown code block."
+      },
+      {
+        "role": "user",
+        "content": "Database Schema:\nTABLE users (id INT, name VARCHAR, age INT);\n\nQuestion: Find the names of users who are older than 30."
+      }
+    ],
+    "temperature": 0.0
+  }'
+
+
+curl http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "Qwen/Qwen3-30B-A3B-Instruct-2507",
+    "messages": [
+      {"role": "system", "content": "You are a text-to-SQL expert. Return ONLY valid executable SQLite syntax without markdown backticks."},
+      {"role": "user", "content": "Database: circuits (circuitId, name, lat, lng), races (raceId, circuitId, name). Question: What is the coordinates location of the circuits for Australian grand prix?"}
+    ],
+    "temperature": 0.0
+  }'
+# {"id":"chatcmpl-0f833daf083b4dd098a10054368927be","object":"chat.completion","created":1780958472,"model":"Qwen/Qwen3-30B-A3B-Instruct-2507","choices":[{"index":0,"message":{"role":"assistant","content":"SELECT c.lat, c.lng\nFROM circuits c\nJOIN races r ON c.circuitId = r.circuitId\nWHERE r.name = 'Australian Grand Prix';","refusal":null,"annotations":null,"audio":null,"function_call":null,"tool_calls":[],"reasoning_content":null},"logprobs":null,"finish_reason":"stop","stop_reason":null,"token_ids":null}],"service_tier":null,"system_fingerprint":null,"usage":{"prompt_tokens":72,"total_tokens":107,"completion_tokens":35,"prompt_tokens_details":null},"prompt_logprobs":null,"prompt_token_ids":null,"kv_transfer_params":null}
+
+curl http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "Qwen/Qwen3-30B-A3B-Instruct-2507",
+    "messages": [
+      {"role": "system", "content": "You are a text-to-SQL expert. Return ONLY valid executable SQLite syntax without markdown backticks."},
+      {"role": "user", "content": "Database: superhero (id, superhero_name), hero_power (hero_id, power_id), superpower (id, power_name). Question: List down Ajax'\''s superpowers."}
+    ],
+    "temperature": 0.0
+  }'
+
+# {"id":"chatcmpl-b94e538c18dd4f0da53c2babb2612013","object":"chat.completion","created":1780958530,"model":"Qwen/Qwen3-30B-A3B-Instruct-2507","choices":[{"index":0,"message":{"role":"assistant","content":"SELECT sp.power_name\nFROM superhero s\nJOIN hero_power hp ON s.id = hp.hero_id\nJOIN superpower sp ON hp.power_id = sp.id\nWHERE s.superhero_name = 'Ajax';","refusal":null,"annotations":null,"audio":null,"function_call":null,"tool_calls":[],"reasoning_content":null},"logprobs":null,"finish_reason":"stop","stop_reason":null,"token_ids":null}],"service_tier":null,"system_fingerprint":null,"usage":{"prompt_tokens":68,"total_tokens":111,"completion_tokens":43,"prompt_tokens_details":null},"prompt_logprobs":null,"prompt_token_ids":null,"kv_transfer_params":null}
+
+
+cenzwong@computeinstance-e00f7ban8vq1557r0g:~$ curl http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "Qwen/Qwen3-30B-A3B-Instruct-2507",
+    "messages": [
+      {"role": "system", "content": "You are a text-to-SQL expert. Return ONLY valid executable SQLite syntax without markdown backticks."},
+      {"role": "user", "content": "Database: schools (CDSCode, NCESSchool), frpm (CDSCode, Enrollment (Ages 5-17)). Question: List the top five schools, by descending order, from the highest to the lowest, the most number of Enrollment (Ages 5-17). Please give their NCES school identification number."}
+    ],
+    "temperature": 0.0
+  }'
+{"id":"chatcmpl-09b484bda22645a196ed77836cf4f243","object":"chat.completion","created":1780958553,"model":"Qwen/Qwen3-30B-A3B-Instruct-2507","choices":[{"index":0,"message":{"role":"assistant","content":"SELECT NCESSchool\nFROM schools\nJOIN frpm ON schools.CDSCode = frpm.CDSCode\nORDER BY frpm.Enrollment DESC\nLIMIT 5;","refusal":null,"annotations":null,"audio":null,"function_call":null,"tool_calls":[],"reasoning_content":null},"logprobs":null,"finish_reason":"stop","stop_reason":null,"token_ids":null}],"service_tier":null,"system_fingerprint":null,"usage":{"prompt_tokens":104,"total_tokens":140,"completion_tokens":36,"prompt_tokens_details":null},"prompt_logprobs":null,"prompt_token_ids":null,"kv_transfer_params":null}cenzwong@computeinstance-e00f7ban8vq1557r0g:~$ 

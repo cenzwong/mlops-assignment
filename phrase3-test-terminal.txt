@@ -1,0 +1,92 @@
+> uv run python scripts/test_interactive.py > phrase3-test-terminal.txt
+
+Loaded 5 test questions. Firing requests to http://localhost:8001/answer...
+
+[1/5] DB: formula_1
+Question: What is the coordinates location of the circuits for Australian grand prix?
+Response OK: True
+Final SQL: SELECT DISTINCT c.lat, c.lng
+FROM circuits c
+JOIN races r ON c.circuitId = r.circuitId
+WHERE r.name = 'Australian Grand Prix';
+Iterations: 2
+Triggered Revise: True
+History trace:
+  0. generate_sql -> SELECT c.lat, c.lng
+FROM circuits c
+JOIN races r ON c.circuitId = r.circuitId
+WHERE r.name = 'Australian Grand Prix';
+  1. verify -> ok=False, issue=The query returned 11 identical rows with the same coordinates (-34.9272, 138.617), which suggests a data duplication issue or incorrect JOIN logic. The Australian Grand Prix has historically been held at a single circuit (Melbourne Grand Prix Circuit), so only one unique coordinate pair should be returned. The repeated rows indicate the query is not properly filtering or deduplicating results, likely due to a flawed JOIN or missing DISTINCT clause.
+  2. revise -> SELECT DISTINCT c.lat, c.lng
+FROM circuits c
+JOIN races r ON c.circuitId = r.circuitId
+WHERE r.name = 'Australian Grand Prix';
+  3. verify -> ok=True, issue=
+------------------------------------------------------------
+
+[2/5] DB: superhero
+Question: List down Ajax's superpowers.
+Response OK: True
+Final SQL: SELECT sp.power_name
+FROM superhero s
+JOIN hero_power hp ON s.id = hp.hero_id
+JOIN superpower sp ON hp.power_id = sp.id
+WHERE s.superhero_name = 'Ajax';
+Iterations: 1
+Triggered Revise: False
+------------------------------------------------------------
+
+[3/5] DB: california_schools
+Question: List the top five schools, by descending order, from the highest to the lowest, the most number of Enrollment (Ages 5-17). Please give their NCES school identification number.
+Response OK: True
+Final SQL: SELECT s."NCESSchool", f."Enrollment (Ages 5-17)"
+FROM "schools" s
+JOIN "frpm" f ON s."CDSCode" = f."CDSCode"
+ORDER BY f."Enrollment (Ages 5-17)" DESC
+LIMIT 5;
+Iterations: 1
+Triggered Revise: False
+------------------------------------------------------------
+
+[4/5] DB: financial
+Question: What is the average number of crimes committed in 1995 in regions where the number exceeds 4000 and the region has accounts that are opened starting from the year 1997?
+Response OK: True
+Final SQL: SELECT AVG(d.A14) AS average_crimes
+FROM district d
+JOIN account a ON d.district_id = a.district_id
+WHERE d.A14 > 4000
+  AND strftime('%Y', a.date) >= '1997';
+Iterations: 3
+Triggered Revise: True
+History trace:
+  0. generate_sql -> SELECT AVG(d.A14) AS average_crimes
+FROM district d
+JOIN account a ON d.district_id = a.district_id
+WHERE d.A14 > 4000
+  AND strftime('%Y', a.date) >= '1997';
+  1. verify -> ok=False, issue=The query returned zero rows (empty result set) despite the user's question assuming the existence of regions with crimes > 4000 and accounts opened from 1997. This indicates a logic mismatch: either the JOIN condition is incorrect, the date filtering is misapplied, or the data does not meet the criteria. The absence of any returned data (even a single row with average_crimes) suggests the filter conditions are too restrictive or the underlying data does not satisfy the constraints, but the user's question implies such data should exist. Verify the data in the 'district' and 'account' tables for valid district_id matches and account dates starting from 1997.
+  2. revise -> SELECT AVG(d.A14) AS average_crimes
+FROM district d
+JOIN account a ON d.district_id = a.district_id
+WHERE d.A14 > 4000
+  AND strftime('%Y', a.date) >= '1997';
+  3. verify -> ok=False, issue=The query returned zero rows (empty result set) despite the user's question assuming the existence of regions with crimes > 4000 and accounts opened from 1997. This indicates a logic mismatch: either the JOIN condition is incorrect, the date filtering is misapplied, or the data does not meet the criteria. The absence of any returned data (even a single row with average_crimes) suggests the filter conditions are too restrictive or the underlying data does not satisfy the constraints, but the user's question implies such data should exist. Verify the data in the 'district' and 'account' tables for valid district_id matches and account dates starting from 1997.
+  4. revise -> SELECT AVG(d.A14) AS average_crimes
+FROM district d
+JOIN account a ON d.district_id = a.district_id
+WHERE d.A14 > 4000
+  AND strftime('%Y', a.date) >= '1997';
+  5. verify -> ok=False, issue=The query returned zero rows (empty result set) despite the user's question assuming the existence of regions with crimes > 4000 and accounts opened from 1997. This indicates a logic mismatch: either the JOIN condition is incorrect, the date filtering is misapplied, or the data does not meet the criteria. The absence of any returned data (even a single row with average_crimes) suggests the filter conditions are too restrictive or the underlying data does not satisfy the constraints, but the user's question implies such data should exist. Verify the data in the 'district' and 'account' tables for valid district_id matches and account dates starting from 1997.
+------------------------------------------------------------
+
+[5/5] DB: financial
+Question: How many male clients in 'Hl.m. Praha' district?
+Response OK: True
+Final SQL: SELECT COUNT(*) 
+FROM client c
+JOIN district d ON c.district_id = d.district_id
+WHERE c.gender = 'M' AND d.A2 = 'Hl.m. Praha';
+Iterations: 1
+Triggered Revise: False
+------------------------------------------------------------
+
